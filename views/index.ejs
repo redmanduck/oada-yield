@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <style type="text/css">
+      html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
+    </style>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQPtyARroTFZaEuW4ErvL1YYqgGqFbJJY">
+    </script>
+    <script type="text/javascript">
+      var oada_location_stream = <%-JSON.stringify(oada_location_stream)%>;
+      function initialize() {
+        if(oada_location_stream.length == 0){
+          alert("The stream provided is empty!");
+          return;
+        }
+        var first = oada_location_stream[0];
+        var mapOptions = {
+          center: { lat: Number(first.lat), lng: Number(first.lon)},
+          zoom: 8
+        };
+        var map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+
+      
+
+        initialize_data(map);
+      }
+
+      function initialize_data(map){
+      	console.log(oada_location_stream);
+        for(var i in oada_location_stream){
+          var geo = oada_location_stream[i];
+          new google.maps.Marker({
+            position: {lat: Number(geo.lat), lng: Number(geo.lon)},
+            map: map
+          });
+        }
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+<div id="map-canvas"></div>
+  </body>
+</html>
