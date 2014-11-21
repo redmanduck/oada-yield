@@ -12,11 +12,10 @@ function comparator(a,b) {
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  var url = "https://beta.caseihconnect.com:8443/oada/resources/LOC4727";
+  // var url = "https://beta.caseihconnect.com:8443/oada/resources/LOC4727";
   var raw  = require('../public/data.json');
   //TODO: move this to /raw endpoint
   var points = raw.locations.sort(comparator);
-  console.log(points);
   res.render('index', { title: 'OADA visual tool',
 		  						oada_location_stream: points });
 });

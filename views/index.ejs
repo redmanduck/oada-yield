@@ -6,85 +6,13 @@
     <style type="text/css">
       html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
     </style>
-    <script type="text/javascript"
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQPtyARroTFZaEuW4ErvL1YYqgGqFbJJY">
-    </script>
-    <script type="text/javascript">
-      var map = null;
-      var oada_location_stream = <%-JSON.stringify(oada_location_stream)%>;
-      var polypath_points = [];
-      function initialize() {
-        if(oada_location_stream.length == 0){
-          alert("The stream provided is empty!");
-          return;
-        }
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQPtyARroTFZaEuW4ErvL1YYqgGqFbJJY"></script>
+    <script type="text/javascript" src="/js/utils.js"></script>
+    <script type="text/javascript" src="/js/map.js"></script>
 
-        var first = oada_location_stream[0];
-        var mapOptions = {
-          center: { lng: -86.1887270722797568, lat: 40.9742436131143680},
-
-          zoom: 15
-        };
-        map = new google.maps.Map(document.getElementById('map-canvas'),
-            mapOptions);
-
-      
-        setTimeout(initialize_data(), 2000);
-      }
-
-      function dist(a,b){
-        var R  = 6371; 
-        var phi1 = rad(Number(a.latitude));
-        var phi2 = rad(Number(b.latitude));
-        var dphi = rad(Number(b.latitude) - Number(a.latitude));
-        var dlambda = rad(Number(b.longitude) - Number(a.longitude));
-        var a = Math.sin(dphi/2) * Math.sin(dphi/2) + Math.cos(phi1) * Math.cos(phi2) *  Math.sin(dlambda/2) * Math.sin(dlambda/2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-      }
-      
-      function rad(x){
-        return x * Math.PI / 180;
-      }
-      function plot_path(){
-        console.log("plotting path");
-          var fpath = new google.maps.Polyline({
-            path: polypath_points,
-            geodesic: true,
-            strokeColor: '#FF0000',
-            strokeOpacity: 1.0,
-            strokeWeight: 1
-          });
-          fpath.setMap(map);
-          var last  = polypath_points[polypath_points.length -1 ];
-          // map.panTo({lat: Number(last.latitude), lng: Number(last.longitude)});
-      }
-
-
-      var point_cnt = 5000;
-      function pushPoint(){
-        var MAXDIST = 1; //max dist must be 1 km apart
-        var geo_prev = oada_location_stream[point_cnt];
-        var geo = oada_location_stream[++point_cnt];
-        if(Number(geo.latitude) == 0){
-          return;
-        }
-        if(dist(geo, geo_prev) > MAXDIST){
-          return;
-        }
-        polypath_points.push(new google.maps.LatLng(Number(geo.latitude), Number(geo.longitude)))
-        plot_path();
-      }
-
-      function initialize_data(){
-        setInterval(pushPoint, 600);
-      }
-      
-
-      google.maps.event.addDomListener(window, 'load', initialize);
-    </script>
   </head>
-  <body>
-<div id="map-canvas"></div>
-  </body>
+<body>
+  <div id="map-canvas"></div>
+</body>
 </html>
