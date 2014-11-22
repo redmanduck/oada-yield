@@ -6,7 +6,11 @@ var responses = {
 	location: {}
 }
 
-function blobify(coord, width, height){
+/*
+*  Generate a polygon 
+*  given a point and how big you want that polygon to be
+*/
+function polygonify(coord, width, height){
   return [
 	   	{lat: coord.lat, lng: coord.lng},
 	   	{lat: coord.lat, lng: coord.lng + width},
@@ -16,9 +20,21 @@ function blobify(coord, width, height){
    ]
 }
 
+/*
+* Generate a polygon to join
+* two polygons together
+*/
+function join_polygons(blobA, blobB){
+	return [
+	   	blobA[1],
+	   	blobA[2],
+	   	blobB[1],
+	   	blobB[2]
+   ]
+}
+
 function make_request(){
   var xhr = new XMLHttpRequest();
-  xhr.withCredentials = true;
   xhr.open("GET", API.location, true);
   xhr.setRequestHeader("Authorization","Bearer 123456789");
 
@@ -27,8 +43,9 @@ function make_request(){
 	    throw new Error('CORS not supported');
 	}
 	xhr.onload = function() {
+
 	 var responseText = xhr.responseText;
-	 console.log(responseText);
+	 done_request(responseText)
 	};
 	xhr.onerror = function() {
 	  console.log('CORS: There was an error!');
@@ -37,12 +54,23 @@ function make_request(){
 
 }
 
-function done_request(){
-	console.log("done API request")
+function done_request(rtext){
+	var jsonres = null;
+	try{
+		jsonres = JSON.parse(rtext);
+	}catch(ex){
+		console.error("Unable to parse response : " + rtext);
+	}
+	var streamdata = jsonres.stream;
+	for(var i = 0; i < streamdata.length ; i++){
+		streamdata[i].lat = parseFloat(streamdata[i].lat)
+		streamdata[i].lng = parseFloat(streamdata[i].lon)
+	}
+	console.log(streamdata);
+	theoreticalStream = theoreticalStream.concat(streamdata);
 }
-
-var theoreticalStream = [
-	   	{lat: 45.00503367944457, lng: -89.99988198280334},
+/*
+{lat: 45.00503367944457, lng: -89.99988198280334},
 	   	{lat: 45.00503367944457, lng: -89.99981492757797},
 	   	{lat: 45.00503367944457, lng: -89.99976933002472},
 	   	{lat: 45.00503367944457, lng: -89.99972239136696},
@@ -55,12 +83,18 @@ var theoreticalStream = [
 	   	{lat: 45.00503367944457, lng: -89.99934688210487},
 	   	{lat: 45.00503367944457, lng: -89.99930396676064},
 	   	{lat: 45.00503367944457, lng: -89.99925434589386}
+	   	*/
+var theoreticalStream = [
+	   	
 ]
 var last_t = 0;
+var dLAT = 0.00005284466;
+var dLON =  0.00002284466;
 var connector = {
   reload : function(){
-  	var tset = [];
+  	console.log(theoreticalStream)
   	if(last_t > theoreticalStream.length - 1) return;
+
     // for(var i = 0; i < 4;i++){
     // 	var newpt = {
 	   //    lat: Math.random()*-20,
@@ -68,9 +102,21 @@ var connector = {
 	   //  }
 	   //  tset.push(newpt);
     // }
-    tset.push(blobify(theoreticalStream[last_t++],  0.00005284466, 0.00002284466))
-    postMessage(tset);
+    var b = polygonify(theoreticalStream[last_t], dLAT, dLON);
+
+    if(theoreticalStream[last_t - 1] !== undefined){
+    	//if there is a previous point
+    	//connect the it with the next point
+    	var a = polygonify(theoreticalStream[last_t - 1], dLAT, dLON);
+
+    	var joint = join_polygons(a,b);
+    	postMessage(joint);
+    }
+    //connect previous point
+    last_t++;
+    postMessage(b);
   }
 }
 
 setInterval(connector.reload, 1000);
+make_request();

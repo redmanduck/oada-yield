@@ -5,30 +5,17 @@ var OADAMap = {
 }
 
 var OADAStreams = {
-  location: [
-    [
-       { lat: 45.00504885097497, lng: -90.0000362098217 },
-       { lat: 45.00502419723603, lng: -90.0000362098217 },
-       { lat: 45.00502514545694, lng: -89.99988868832588 },
-       { lat: 45.005045058092726, lng: -89.99988868832588 }
-    ]
-    ],
+  location: [],
     getNext: function(){
       return this.location[OADAMap.polygon_count++];
     },
     hasNext: function(){
       if(OADAMap.polygon_count == this.location.length) return false;
       return true;
+    },
+    size: function(){
+      return this.location.length;
     }
-}
-
-
-/*
-* Take a {lat, lng} object, and a width and height
-* and return a polygon (array of 4 points) 
-*/
-function toPolygon(pt, wid, len){
-
 }
 
 //Use this web worker to update points
@@ -61,8 +48,11 @@ function initialize() {
 
 function updateMap(){
   if(!OADAStreams.hasNext()) return;
-  console.log("Updating map")
-  draw(OADAStreams.getNext());
+  var v = OADAStreams.getNext();
+  draw(v);
+  if(OADAStreams.size() == 1){
+    OADAMap.map.panTo(v[0]);
+  }
 }
 
 
@@ -80,18 +70,9 @@ function draw(data){
     var obj = OADAMap.polygons[OADAMap.polygons.length - 1];
     obj.setMap(OADAMap.map);
     
-    // google.maps.event.addListener(obj, 'click', alert());
 }
 
 
 google.maps.event.addDomListener(window, 'load', initialize);
 
 
-var request = window.superagent;
-var url = 'https://provider.oada-dev.com/tierra/oada/resources/LOC4727';
-request
-  .get(url)
-  .set('Authorization', 'Bearer 123456789')
-  .end(function(error, res){
-    console.log(res);
-  });
