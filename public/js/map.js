@@ -28,7 +28,7 @@ var OADAStreams = {
 * and return a polygon (array of 4 points) 
 */
 function toPolygon(pt, wid, len){
-  
+
 }
 
 //Use this web worker to update points
@@ -85,3 +85,13 @@ function draw(data){
 
 
 google.maps.event.addDomListener(window, 'load', initialize);
+
+
+var request = window.superagent;
+var url = 'https://provider.oada-dev.com/tierra/oada/resources/LOC4727';
+request
+  .get(url)
+  .set('Authorization', 'Bearer 123456789')
+  .end(function(error, res){
+    console.log(res);
+  });
