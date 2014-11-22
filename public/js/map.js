@@ -23,14 +23,17 @@ var pfetch = new Worker("/js/workers/fetch.js");
 pfetch.onmessage = function(ev){
    OADAStreams.location.push(ev.data)
 }
-// pfetch.postMessage({base_url: "https://provider.oada-dev.com/tierra/oada"});
 
-
+/**
+ * Start the background fetch worker.
+ */
 function startWorker(){
   pfetch.postMessage({base_url: "https://provider.oada-dev.com/tierra/oada"});
 }
 
-
+/**
+ * Initializes the map. Setups UI.
+ */
 function initialize() {
 
   var INIT_ZOOMLEVEL = 18;
@@ -58,8 +61,10 @@ function initialize() {
     console.log({lat: lat, lng: lng});
   });
 
+  //periodically update map with new incoming point
   myInterval = setInterval(function() { updateMap(); }, 500);
 
+  //display setup modal dialog
   setTimeout(function(){
     $('#modal_setup').modal({
       'backdrop': 'static',
@@ -69,7 +74,10 @@ function initialize() {
 
 }
 
-
+/**
+ * Update map if possible
+ * based on the stream
+ */
 function updateMap(){
   if(!OADAStreams.hasNext()) return;
   var v = OADAStreams.getNext();
@@ -79,7 +87,11 @@ function updateMap(){
   }
 }
 
-
+/**
+ * Draw the polygon on map
+ * @param {array} data - array of 2 or more 
+ *    latlon points to construct polygon from
+ */
 function draw(data){
     OADAMap.polygons.push(
             new google.maps.Polygon({

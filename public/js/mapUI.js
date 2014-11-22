@@ -1,3 +1,11 @@
+/**
+ * Represents a generic control button.
+ * @constructor
+ * @param {string} text - button text
+ * @param {function} action - callback function
+ * @param {div} controlDiv - div to be filled
+ * @param {googlemap} map - map object
+ */
 function Control(text, action, controlDiv, map) {
   controlDiv.style.padding = '5px';
 
