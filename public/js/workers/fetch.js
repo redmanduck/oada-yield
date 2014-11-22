@@ -1,9 +1,16 @@
+var config = {
+	base_url: ""
+}
 var API = {
-	location: "https://provider.oada-dev.com/tierra/oada/resources/LOC4727"
+	location: "/resources/LOC4727"
 };
 
 var responses = {
 	location: {}
+}
+
+var url_params = {
+	"view": { "stream": { "$each": { "t": { "$gt": 1416441600  } } } }
 }
 
 /*
@@ -35,7 +42,9 @@ function join_polygons(blobA, blobB){
 
 function make_request(){
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", API.location, true);
+  var url = config.base_url + API.location + "?view=" + encodeURIComponent(JSON.stringify(url_params.view));
+  xhr.open("GET", url, true);
+  console.log("making request to " + url);
   xhr.setRequestHeader("Authorization","Bearer 123456789");
 
 	if (!xhr) {
@@ -92,7 +101,6 @@ var dLAT = 0.00005284466;
 var dLON =  0.00002284466;
 var connector = {
   reload : function(){
-  	console.log(theoreticalStream)
   	if(last_t > theoreticalStream.length - 1) return;
 
     // for(var i = 0; i < 4;i++){
@@ -109,8 +117,8 @@ var connector = {
     	//connect the it with the next point
     	var a = polygonify(theoreticalStream[last_t - 1], dLAT, dLON);
 
-    	var joint = join_polygons(a,b);
-    	postMessage(joint);
+    	// var joint = join_polygons(a,b);
+    	// postMessage(joint);
     }
     //connect previous point
     last_t++;
@@ -118,5 +126,9 @@ var connector = {
   }
 }
 
-setInterval(connector.reload, 1000);
-make_request();
+//wait for init from main thread
+self.addEventListener('message', function(ev) {
+  config.base_url = ev.data.base_url;
+  setInterval(connector.reload, 1000);
+  make_request();
+}, false);

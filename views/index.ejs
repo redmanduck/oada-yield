@@ -3,14 +3,60 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
     <style type="text/css">
+      #sidebar .heading{
+        background-color:#0449AF;
+        color:white;
+        padding:15px;
+        padding-left:20px;
+        text-shadow: 1px 0px 1px black;
+      }
+      #sidebar .content{
+        padding:5px;
+        margin-left:10px;
+      }
+      .modal-header-override{
+        background-color:#063FBC !important; 
+        color:white !important; 
+        border-radius:4px 4px 0px 0px !important; 
+        text-shadow:1px 0px 0px black !important;
+      }
       html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
+
     </style>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQPtyARroTFZaEuW4ErvL1YYqgGqFbJJY"></script>
     <script type="text/javascript" src="/js/utils.js"></script>
     <script type="text/javascript" src="/js/map.js"></script>
+    <script type="text/javascript" src="/js/mapUI.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+
   </head>
 <body>
   <div id="map-canvas"></div>
+  
+<!-- Setup Dialog -->
+<div class="modal fade" id="modal_setup" tabindex="-1" role="dialog" aria-labelledby="modal_setupLbl" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header modal-header-override">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="modal_setupLbl">Setup OADA connection</h4>
+      </div>
+      <div class="modal-body">
+       OADA Provider base URL 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Documentation</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="startWorker()">Track</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

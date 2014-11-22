@@ -23,6 +23,13 @@ var pfetch = new Worker("/js/workers/fetch.js");
 pfetch.onmessage = function(ev){
    OADAStreams.location.push(ev.data)
 }
+// pfetch.postMessage({base_url: "https://provider.oada-dev.com/tierra/oada"});
+
+
+function startWorker(){
+  pfetch.postMessage({base_url: "https://provider.oada-dev.com/tierra/oada"});
+}
+
 
 function initialize() {
 
@@ -35,14 +42,31 @@ function initialize() {
     mapTypeId: google.maps.MapTypeId.SATELLITE
   };
 
+
+  var disconnect_btn_div = document.createElement('div');
+  var disconnect_btn = new Control("Disconnect (Stop)", null, disconnect_btn_div, OADAMap.map);
+  disconnect_btn_div.index = 1;
+
+
   OADAMap.map = new google.maps.Map(document.getElementById('map-canvas'), options);
+  OADAMap.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(disconnect_btn_div);
+
   //some tool for debugging
   google.maps.event.addListener(OADAMap.map, "rightclick", function(event){
     var lat = event.latLng.lat();
     var lng = event.latLng.lng();
     console.log({lat: lat, lng: lng});
   });
+
   myInterval = setInterval(function() { updateMap(); }, 500);
+
+  setTimeout(function(){
+    $('#modal_setup').modal({
+      'backdrop': 'static',
+      'keyboard': false
+    });
+  }, 500);
+
 }
 
 
@@ -74,5 +98,3 @@ function draw(data){
 
 
 google.maps.event.addDomListener(window, 'load', initialize);
-
-
