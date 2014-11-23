@@ -54,10 +54,19 @@ function make_request(){
 	xhr.onload = function() {
 
 	 var responseText = xhr.responseText;
-	 done_request(responseText)
+	 done_request(responseText);
+
+	  postMessage({
+	    	message: "status_update",
+	    	object: "Disconnect (Stop)"
+	  });
+
 	};
 	xhr.onerror = function() {
-	  console.log('CORS: There was an error!');
+	  postMessage({
+	    	message: "status_update",
+	    	object: "XHR Error!"
+	  });
 	};
 	xhr.send();
 
@@ -122,7 +131,10 @@ var connector = {
     }
     //connect previous point
     last_t++;
-    postMessage(b);
+    postMessage({
+    	message: "location_push",
+    	object: b
+    });
   }
 }
 

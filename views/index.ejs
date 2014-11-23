@@ -3,7 +3,10 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="shortcut icon" href="/favicon.png">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/vendors/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" />
 
     <style type="text/css">
       #sidebar .heading{
@@ -18,21 +21,24 @@
         margin-left:10px;
       }
       .modal-header-override{
-        background-color:#063FBC !important; 
+        background-color:#000000 !important; 
         color:white !important; 
+        font-family: 'Droid Sans', sans-serif;
         border-radius:4px 4px 0px 0px !important; 
-        text-shadow:1px 0px 0px black !important;
+        text-shadow:0px 0px 0px #002240 !important;
       }
       html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
 
     </style>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQPtyARroTFZaEuW4ErvL1YYqgGqFbJJY"></script>
-    <script type="text/javascript" src="/js/utils.js"></script>
-    <script type="text/javascript" src="/js/map.js"></script>
-    <script type="text/javascript" src="/js/mapUI.js"></script>
-
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQPtyARroTFZaEuW4ErvL1YYqgGqFbJJY"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="/vendors/moment/min/moment.min.js"></script>
+    <script src="/vendors/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="/vendors/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/map.js"></script>
+    <script src="/js/mapUI.js"></script>
 
 
   </head>
@@ -44,15 +50,50 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header modal-header-override">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="modal_setupLbl">Setup OADA connection</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title" id="modal_setupLbl">Setup an OADA connection</h4>
       </div>
+
       <div class="modal-body">
-       OADA Provider base URL 
+
+        <div class="input-group">
+          <span class="input-group-addon">Base Provider URL</span>
+          <input type="text" class="form-control" placeholder="https://oada.domain.com">
+        </div><br>
+        <div class="input-daterange input-group" id="datepicker">
+            <span class="input-group-addon">Time Range</span>
+            <input type="text" class="input-sm form-control" name="start" />
+            <span class="input-group-addon">to</span>
+            <input type="text" class="input-sm form-control date-nofill" name="end" placeholder="Leave blank if no time limit" value=""/>
+        </div>
+        <br>
+        <div class="input-group ">
+          <div class="btn-group" data-toggle="buttons">
+            <label class="btn btn-primary active">
+              <input type="radio" name="options" id="option1" autocomplete="off" checked> 1x (Realtime)
+            </label>
+            <label class="btn btn-primary">
+              <input type="radio" name="options" id="option2" autocomplete="off"> 2x
+            </label>
+            <label class="btn btn-primary">
+              <input type="radio" name="options" id="option3" autocomplete="off"> 4x
+            </label>
+            <label class="btn btn-primary">
+              <input type="radio" name="options" id="option3" autocomplete="off"> 8x
+            </label>
+            <label class="btn btn-primary">
+              <input type="radio" name="options" id="option3" autocomplete="off"> 16x
+            </label>
+          </div>
+        </div>
       </div>
+
+
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Documentation</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="startWorker()">Track</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Docs</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="startWorker()">Start</button>
       </div>
     </div>
   </div>

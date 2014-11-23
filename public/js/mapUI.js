@@ -6,6 +6,10 @@
  * @param {div} controlDiv - div to be filled
  * @param {googlemap} map - map object
  */
+
+var UIManager = {
+  control_count : 0
+}
 function Control(text, action, controlDiv, map) {
   controlDiv.style.padding = '5px';
 
@@ -17,16 +21,17 @@ function Control(text, action, controlDiv, map) {
   controlUI.style.paddingTop = '2px';
   controlUI.style.cursor = 'pointer';
   controlUI.style.textAlign = 'center';
-  controlUI.title = 'Click to disconnect from OADA provider..';
+  controlUI.title = 'OADA provider..';
   controlDiv.appendChild(controlUI);
 
+  var id = "control_" + ++UIManager.control_count;
   // Set CSS for the control interior
   var controlText = document.createElement('div');
   controlText.style.fontFamily = 'sans-serif';
   controlText.style.fontSize = '11px';
   controlText.style.paddingLeft = '4px';
   controlText.style.paddingRight = '4px';
-  controlText.innerHTML = text;
+  controlText.innerHTML = "<span id='" + id + "'>" +  text + "</span>";
   controlUI.appendChild(controlText);
 
 

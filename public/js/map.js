@@ -1,7 +1,12 @@
 var OADAMap = {
         map: null,
         polygons: [],
-        polygon_count: 0
+        polygon_count: 0,
+        status_controlId: null,
+        update_status: function(str){
+          var m = document.getElementById(this.status_controlId);
+          m.innerHTML = str;
+        }
 }
 
 var OADAStreams = {
@@ -21,13 +26,18 @@ var OADAStreams = {
 //Use this web worker to update points
 var pfetch = new Worker("/js/workers/fetch.js");
 pfetch.onmessage = function(ev){
-   OADAStreams.location.push(ev.data)
+   if(ev.data.message == "location_push"){
+      OADAStreams.location.push(ev.data.object);
+   }else if(ev.data.message == "status_update"){
+      OADAMap.update_status(ev.data.object);
+   }
 }
 
 /**
  * Start the background fetch worker.
  */
 function startWorker(){
+  OADAMap.update_status("Attempting to connect..");
   pfetch.postMessage({base_url: "https://provider.oada-dev.com/tierra/oada"});
 }
 
@@ -42,14 +52,20 @@ function initialize() {
   var options = {
     center: INIT_LATLNG,
     zoom: INIT_ZOOMLEVEL,
-    mapTypeId: google.maps.MapTypeId.SATELLITE
+    mapTypeId: google.maps.MapTypeId.SATELLITE,
+    disableDefaultUI: true,
+    mapTypeControl: true,
+    mapTypeControlOptions: {
+      style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+    },
+
   };
 
 
   var disconnect_btn_div = document.createElement('div');
-  var disconnect_btn = new Control("Disconnect (Stop)", null, disconnect_btn_div, OADAMap.map);
+  var control = new Control("Not connected!", null, disconnect_btn_div, OADAMap.map);
   disconnect_btn_div.index = 1;
-
+  OADAMap.status_controlId = "control_" + UIManager.control_count;
 
   OADAMap.map = new google.maps.Map(document.getElementById('map-canvas'), options);
   OADAMap.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(disconnect_btn_div);
@@ -70,6 +86,15 @@ function initialize() {
       'backdrop': 'static',
       'keyboard': false
     });
+
+    $('#datepicker .input-sm').datetimepicker({
+            pickDate: true,
+            defaultDate: new Date()
+     });
+
+    $("#datepicker .date-nofill").val("");
+
+
   }, 500);
 
 }
