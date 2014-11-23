@@ -3,5 +3,7 @@ OADA Yield
 
 Yield map for any OADA server. Work in progress.
 
-![Screenshot](https://dl.dropboxusercontent.com/u/41564792/Screen%20Shot%202014-11-22%20at%205.30.34%20PM.png)
-![Screenshot](https://dl.dropboxusercontent.com/u/41564792/Screen%20Shot%202014-11-22%20at%205.35.11%20PM.png)
+- Ability to view stream in realtime.
+- Ability to playback past streams from any timeframe in any speed.
+
+![Screenshot](https://dl.dropboxusercontent.com/u/41564792/Screen%20Shot%202014-11-23%20at%2012.29.37%20AM.png)
