@@ -14,6 +14,9 @@ var OADAStreams = {
     getNext: function(){
       return this.location[OADAMap.polygon_count++];
     },
+    getTail: function(){
+      return this.location[OADAMap.polygon_count - 1];
+    },
     hasNext: function(){
       if(OADAMap.polygon_count == this.location.length) return false;
       return true;
@@ -53,7 +56,6 @@ function initialize() {
     center: INIT_LATLNG,
     zoom: INIT_ZOOMLEVEL,
     mapTypeId: google.maps.MapTypeId.SATELLITE,
-    disableDefaultUI: true,
     mapTypeControl: true,
     mapTypeControlOptions: {
       style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
@@ -99,16 +101,38 @@ function initialize() {
 
 }
 
+/*
+* Haversine formula 
+* from http://rosettacode.org
+*/
+function haversine() {
+       var radians = Array.prototype.map.call(arguments, function(deg) { return deg/180.0 * Math.PI; });
+       var lat1 = radians[0], lon1 = radians[1], lat2 = radians[2], lon2 = radians[3];
+       var R = 6372.8; // km
+       var dLat = lat2 - lat1;
+       var dLon = lon2 - lon1;
+       var a = Math.sin(dLat / 2) * Math.sin(dLat /2) + Math.sin(dLon / 2) * Math.sin(dLon /2) * Math.cos(lat1) * Math.cos(lat2);
+       var c = 2 * Math.asin(Math.sqrt(a));
+       return R * c;
+}
+
 /**
  * Update map if possible
  * based on the stream
  */
 function updateMap(){
   if(!OADAStreams.hasNext()) return;
+  var k = OADAStreams.getTail();
   var v = OADAStreams.getNext();
+  // console.log("Distance diff is " + dist)
   draw(v);
-  if(OADAStreams.size() == 1){
-    OADAMap.map.panTo(v[0]);
+
+  if(k !== undefined){
+    var dist = haversine(v[0].lat, v[0].lng, k[0].lat, k[0].lng);
+
+    if(dist > 1){
+      OADAMap.map.panTo(v[0]); //note that v is a array of N elements, each element is the vertex of the polygon.
+    }
   }
 }
 
