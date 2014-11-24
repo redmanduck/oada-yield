@@ -71,8 +71,8 @@
         <br>
         <div class="input-group ">
           <div class="btn-group" data-toggle="buttons">
-            <label class="btn btn-primary active">
-              <input type="radio" name="options" id="option1" autocomplete="off" checked> 1x (Realtime)
+            <label class="btn btn-primary">
+              <input type="radio" name="options" id="option1" autocomplete="off"> 1x
             </label>
             <label class="btn btn-primary">
               <input type="radio" name="options" id="option2" autocomplete="off"> 2x
@@ -86,13 +86,18 @@
             <label class="btn btn-primary">
               <input type="radio" name="options" id="option3" autocomplete="off"> 16x
             </label>
+            <label class="btn btn-primary">
+              <input type="radio" name="options" id="option3" autocomplete="off"> 20 fps*
+            </label>
+            <label class="btn btn-primary active">
+              <input type="radio" name="options" id="option3" autocomplete="off" checked=""> 40 fps*
+            </label>
           </div>
         </div>
       </div>
 
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Docs</button>
         <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="startWorker()">Start</button>
       </div>
     </div>

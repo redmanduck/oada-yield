@@ -109,7 +109,8 @@ var last_t = 0;
 var dLAT = 0.00005284466;
 var dLON =  0.00002284466;
 var connector = {
-  reload : function(){
+  reload: function(){},
+  sendstream : function(){
   	if(last_t > theoreticalStream.length - 1) return;
 
     // for(var i = 0; i < 4;i++){
@@ -141,6 +142,6 @@ var connector = {
 //wait for init from main thread
 self.addEventListener('message', function(ev) {
   config.base_url = ev.data.base_url;
-  setInterval(connector.reload, 1000);
+  setInterval(connector.sendstream, 25);
   make_request();
 }, false);
