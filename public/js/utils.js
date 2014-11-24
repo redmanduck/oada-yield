@@ -1,17 +1,23 @@
 
 var Utils = {
-  dist: function(a,b){
-    var R  = 6371; 
-    var phi1 = Utils.rad(Number(a.latitude));
-    var phi2 = Utils.rad(Number(b.latitude));
-    var dphi = Utils.rad(Number(b.latitude) - Number(a.latitude));
-    var dlambda = Utils.rad(Number(b.longitude) - Number(a.longitude));
-    var a = Math.sin(dphi/2) * Math.sin(dphi/2) + Math.cos(phi1) * Math.cos(phi2) *  Math.sin(dlambda/2) * Math.sin(dlambda/2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
+  rgbtohex: function(red, green, blue)
+  {
+    var decColor =0x1000000+ blue + 0x100 * green + 0x10000 *red ;
+    return '#'+decColor.toString(16).substr(1);
   },
-  rad: function(x){
-    return x * Math.PI / 180;
+  haversine: function() {
+  	    /*
+		* Haversine formula 
+		* from http://rosettacode.org
+		*/
+       var radians = Array.prototype.map.call(arguments, function(deg) { return deg/180.0 * Math.PI; });
+       var lat1 = radians[0], lon1 = radians[1], lat2 = radians[2], lon2 = radians[3];
+       var R = 6372.8; // km
+       var dLat = lat2 - lat1;
+       var dLon = lon2 - lon1;
+       var a = Math.sin(dLat / 2) * Math.sin(dLat /2) + Math.sin(dLon / 2) * Math.sin(dLon /2) * Math.cos(lat1) * Math.cos(lat2);
+       var c = 2 * Math.asin(Math.sqrt(a));
+       return R * c;
   }
 
 }

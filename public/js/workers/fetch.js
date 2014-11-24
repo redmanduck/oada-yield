@@ -16,7 +16,7 @@ var responses = {
 var _STARTDATE = 1416488428;
 var _ENDDATE = 1416506428;
 var stream_pts = [];
-var last_t = 0;
+var polyoffset = 0;
 var dLAT = 0.00005284466; //the width of a polygon
 var dLON =  0.00002284466;
 var url_params = {
@@ -38,7 +38,7 @@ function time_compare(a,b){
 }
 
 //kdtree for wet mass flow points so we can search
-var wmftree = kdTree([], time_diff, ["t"]);
+var wmftree = new kdTree([], time_diff, ["t"]);
 
 /*
 *  Generate a polygon 
@@ -87,11 +87,6 @@ function make_request(uri, done_request){
 
 	 done_request(responseText);
 
-	  postMessage({
-	    	message: "status_update",
-	    	object: "Disconnect (Stop)"
-	  });
-
 	};
 	xhr.onerror = function() {
 	  postMessage({
@@ -104,7 +99,7 @@ function make_request(uri, done_request){
 }
 
 /*
-* Callback function for Wet mass flow stream request
+* Callback function for wet mass flow stream request
 * given a response text 
 * returns nothing
 */
@@ -116,10 +111,19 @@ function done_wmf(rtext){
 		console.error("Unable to parse response : " + rtext);
 	}
 	var streamdata = jsonres.stream;
-
-	REQUEST_STATES = 
+	for(var i = 0; i < streamdata.length ; i++){
+		streamdata[i].flow = parseFloat(streamdata[i].flow)
+		streamdata[i].t = parseInt(streamdata[i].t);
+		wmftree.insert(streamdata[i]); //insert into kD-tree
+	}
 	console.log("WMF Data length: " + streamdata.length);
 	COMPLETED_WMF = true;
+
+	postMessage({
+	    	message: "status_update",
+	    	object: "Waiting for location stream"
+	});
+
 }
 
 /*
@@ -147,13 +151,19 @@ function done_location(rtext){
 	console.log("Location Data length: " + streamdata.length);
 
 	stream_pts = stream_pts.concat(streamdata.sort(time_compare));
+
+    postMessage({
+	    	message: "status_update",
+	    	object: "Disconnect (Stop)"
+	});
+
 }
 
 
 var connector = {
   reload: function(){},
   sendstream : function(){
-  	if(last_t > stream_pts.length - 1) return;
+  	if(polyoffset > stream_pts.length - 1) return;
 
     // for(var i = 0; i < 4;i++){
     // 	var newpt = {
@@ -162,21 +172,30 @@ var connector = {
 	   //  }
 	   //  tset.push(newpt);
     // }
-    var b = polygonify(stream_pts[last_t], dLAT, dLON);
+    var mypt = stream_pts[polyoffset];
+    var b = polygonify(mypt, dLAT, dLON);
+    var yieldpt = wmftree.nearest(mypt, 1)[0][0];
+    console.log("Yield flow: " + yieldpt.flow)
+    // if(stream_pts[polyoffset - 1] !== undefined){
+    // 	//if there is a previous point
+    // 	//connect the it with the next point
+    // 	var a = polygonify(stream_pts[polyoffset - 1], dLAT, dLON);
 
-    if(stream_pts[last_t - 1] !== undefined){
-    	//if there is a previous point
-    	//connect the it with the next point
-    	var a = polygonify(stream_pts[last_t - 1], dLAT, dLON);
-
-    	// var joint = join_polygons(a,b);
-    	// postMessage(joint);
-    }
+    // 	// var joint = join_polygons(a,b);
+    // 	// postMessage(joint);
+    // }
     //connect previous point
-    last_t++;
+
+    var wrapper = {
+    	"polygon": b,
+    	"point": mypt,
+    	"yield": parseFloat(yieldpt.flow)
+    }
+
+    polyoffset++;
     postMessage({
     	message: "location_push",
-    	object: b
+    	object: wrapper
     });
   }
 }

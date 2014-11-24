@@ -101,20 +101,6 @@ function initialize() {
 
 }
 
-/*
-* Haversine formula 
-* from http://rosettacode.org
-*/
-function haversine() {
-       var radians = Array.prototype.map.call(arguments, function(deg) { return deg/180.0 * Math.PI; });
-       var lat1 = radians[0], lon1 = radians[1], lat2 = radians[2], lon2 = radians[3];
-       var R = 6372.8; // km
-       var dLat = lat2 - lat1;
-       var dLon = lon2 - lon1;
-       var a = Math.sin(dLat / 2) * Math.sin(dLat /2) + Math.sin(dLon / 2) * Math.sin(dLon /2) * Math.cos(lat1) * Math.cos(lat2);
-       var c = 2 * Math.asin(Math.sqrt(a));
-       return R * c;
-}
 
 /**
  * Update map if possible
@@ -128,10 +114,10 @@ function updateMap(){
   draw(v);
 
   if(k !== undefined){
-    var dist = haversine(v[0].lat, v[0].lng, k[0].lat, k[0].lng);
+    var dist = Utils.haversine(v.point.lat, v.point.lng, k.point.lat, k.point.lng);
 
     if(dist > 1){
-      OADAMap.map.panTo(v[0]); //note that v is a array of N elements, each element is the vertex of the polygon.
+      OADAMap.map.panTo(v.point); //note that v is a array of N elements, each element is the vertex of the polygon.
     }
   }
 }
@@ -142,13 +128,17 @@ function updateMap(){
  *    latlon points to construct polygon from
  */
 function draw(data){
+    var fillcol = '#00ff00';
+    if(data.yield < 30){
+      fillcol = '#F7113B';
+    }
     OADAMap.polygons.push(
             new google.maps.Polygon({
-                paths: data,
+                paths: data.polygon,
                 strokeColor: '#00ff00',
                 strokeOpacity: 0.8,
-                strokeWeight: 1,
-                fillColor: '#00ff00',
+                strokeWeight: 0,
+                fillColor: fillcol,
                 fillOpacity: 0.6
             })
     );
