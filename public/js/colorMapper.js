@@ -1,9 +1,24 @@
+/**
+ * Convert HSV to RGB
+ * @constructor
+ * @param {float} min - Minimum range of number to normalize
+ * @param {float} max - Maximum range of number to normalize
+ * @param {float} saturation - Constant Saturation 
+ * @param {float} value - Constant Value
+ */
+
 function colorMapper(min, max, saturation, value){
 	this.mMin = min;
     this.mMax = max;
     this.mSat = saturation;
     this.mVal = value;
 }
+
+
+/**
+ * Map number to HSV
+ * @param {float} num - Number that falls within min,max parameter
+ */
 
 colorMapper.prototype.map = function(num){
 	var hsv = [0.00, 0.00, 0.00];
@@ -14,6 +29,12 @@ colorMapper.prototype.map = function(num){
 	return hsvToRgb(hsv[0], hsv[1], hsv[2]);
 }
 
+/**
+ * Convert HSV to RGB
+ * @param {float} h - Hue
+ * @param {float} s - Saturation
+ * @param {float} v - Value
+ */
 
 function hsvToRgb(h , s , v ) {
 	var C = v * s;

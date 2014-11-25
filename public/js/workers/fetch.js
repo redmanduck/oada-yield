@@ -13,12 +13,20 @@ var responses = {
 	location: {}
 }
 
-var _STARTDATE = 1416488428;
-var _ENDDATE = 1416506428;
-var stream_pts = [];
-var polyoffset = 0;
-var dLAT = 0.00005284466; //the width of a polygon
+//use these to construct view parameter
+var _STARTDATE = 1416488428; 
+var _ENDDATE = 1416506428;  
+
+
+/*
+* Other declarations
+*/
+var stream_pts = []; //sorted stream TODO: we should throw old data away at some point
+var polyoffset = 0;  //iterator offset for stream_pts
+var dLAT = 0.00005284466; //the width of a polygon (will replace with swath_width)
 var dLON =  0.00002284466;
+
+
 var url_params = {
 	"view": { "stream": { "$each": { "t": { "$gt": _STARTDATE, "$lt":  _ENDDATE } } } }
 }
@@ -27,6 +35,7 @@ var url_params = {
 function time_diff(a,b){
 	return Math.abs(b.t - a.t);
 }
+
 function time_compare(a,b){
   if (a.t < b.t) {
     return -1;
@@ -66,10 +75,17 @@ function join_polygons(blobA, blobB){
 	   	blobB[2]
    ]
 }
+
 var COMPLETED_WMF = false; 
 
+/*
+*  Make OADA CORS request with view parameter and auth header
+*  @param {string} uri - path of the OADA API
+*  @param {function} done_request - callback function 
+*/
 function make_request(uri, done_request){
-  COMPLETED_WMF = false;
+
+  COMPLETED_WMF = false; //barrier that blocks location request from proceeded if its done before WMF
 
   var xhr = new XMLHttpRequest();
   var url = config.base_url + uri + "?view=" + encodeURIComponent(JSON.stringify(url_params.view));
@@ -78,9 +94,12 @@ function make_request(uri, done_request){
   xhr.setRequestHeader("Authorization","Bearer 123456789");
 
 	if (!xhr) {
-		console.error("CORS is not supported on your browser");
-	    throw new Error('CORS not supported');
+		postMessage({
+	    	message: "status_update",
+	    	object: "Unsupported Browser!"
+	    });
 	}
+
 	xhr.onload = function() {
 
 	 var responseText = xhr.responseText;
@@ -166,26 +185,19 @@ var connector = {
   sendstream : function(){
   	if(polyoffset > stream_pts.length - 1) return;
 
-    // for(var i = 0; i < 4;i++){
-    // 	var newpt = {
-	   //    lat: Math.random()*-20,
-	   //    lng: Math.random()*10
-	   //  }
-	   //  tset.push(newpt);
-    // }
     var mypt = stream_pts[polyoffset];
     var b = polygonify(mypt, dLAT, dLON);
     var yieldpt = wmftree.nearest(mypt, 1)[0][0];
 
-    // if(stream_pts[polyoffset - 1] !== undefined){
-    // 	//if there is a previous point
-    // 	//connect the it with the next point
-    // 	var a = polygonify(stream_pts[polyoffset - 1], dLAT, dLON);
 
-    // 	// var joint = join_polygons(a,b);
-    // 	// postMessage(joint);
-    // }
-    //connect previous point
+    /* if(stream_pts[polyoffset - 1] !== undefined){
+     	//if there is a previous point connect the it with the next point
+     	var a = polygonify(stream_pts[polyoffset - 1], dLAT, dLON);
+
+     	// var joint = join_polygons(a,b);
+     	// postMessage(joint);
+     } 
+    */
 
     /*
     * polygon: N-vertices Polygon is an array of N latlng
@@ -201,6 +213,7 @@ var connector = {
     console.log("bu/sec (wet): " + wrapper.yield);
 
     polyoffset++;
+    //tell the main thread we are ready
     postMessage({
     	message: "location_push",
     	object: wrapper

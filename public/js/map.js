@@ -9,12 +9,15 @@ var OADAMap = {
         }
 }
 
-var combine_marker = null; //this refers to the position of the combine
+//refers to the position of the combine
+var combine_marker = null; 
 
+//min,max value of yield we expect
 var MINIMUM_EFFECTIVE_YIELD = 0.01;
-var MAXIMUM_EFFECTIVE_YIELD = 1.0;
+var MAXIMUM_EFFECTIVE_YIELD = 1.0;  
 
 var cmapper = new colorMapper(MINIMUM_EFFECTIVE_YIELD, MAXIMUM_EFFECTIVE_YIELD, 1.0,1.0);
+
 var OADAStreams = {
   location: [],
     getNext: function(){
@@ -36,8 +39,10 @@ var OADAStreams = {
 var pfetch = new Worker("/js/workers/fetch.js");
 pfetch.onmessage = function(ev){
    if(ev.data.message == "location_push"){
+      //queue points to be drawn on the map
       OADAStreams.location.push(ev.data.object);
    }else if(ev.data.message == "status_update"){
+      //update status text on screen
       OADAMap.update_status(ev.data.object);
    }
 }
@@ -51,7 +56,8 @@ function startWorker(){
 }
 
 /**
- * Initializes the map. Setups UI.
+ * Initializes the map. 
+ * Setups UI.
  */
 function initialize() {
 
@@ -69,7 +75,7 @@ function initialize() {
 
   };
 
-
+  //create the 'status' button 
   var disconnect_btn_div = document.createElement('div');
   var control = new Control("Not connected!", null, disconnect_btn_div, OADAMap.map);
   disconnect_btn_div.index = 1;
@@ -78,7 +84,7 @@ function initialize() {
   OADAMap.map = new google.maps.Map(document.getElementById('map-canvas'), options);
   OADAMap.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(disconnect_btn_div);
 
-  //some tool for debugging
+  //some tool for debugging, right click to see detail about polygon
   google.maps.event.addListener(OADAMap.map, "rightclick", function(event){
     var lat = event.latLng.lat();
     var lng = event.latLng.lng();
@@ -116,14 +122,13 @@ function updateMap(){
   if(!OADAStreams.hasNext()) return;
   var k = OADAStreams.getTail();
   var v = OADAStreams.getNext();
-  // console.log("Distance diff is " + dist)
   draw(v);
 
   if(k !== undefined){
     var dist = Utils.haversine(v.point.lat, v.point.lng, k.point.lat, k.point.lng);
     //if the distance is greater than 1 km (out of field), move there otherwise we stay where we are
     if(dist > 1){
-      OADAMap.map.panTo(v.point); //note that v is a array of N elements, each element is the vertex of the polygon.
+      OADAMap.map.panTo(v.point); 
     }
   }
 }
@@ -131,13 +136,14 @@ function updateMap(){
 /**
  * Draw the polygon on map
  * @param {array} data - array of 2 or more 
- *    latlon points to construct polygon from
+ *                       latlon points as vertices to construct polygon 
  */
 function draw(data){
     var rgb = cmapper.map(data.yield);
     var fillcol = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
     if(combine_marker != null) combine_marker.setMap(null);
 
+    //if yield is lower than min yield we dont draw but just show combine position
     if(data.yield < MINIMUM_EFFECTIVE_YIELD){
       combine_marker = new google.maps.Marker({
           position: data.point,
@@ -147,6 +153,7 @@ function draw(data){
 
       return; 
     }
+    
     OADAMap.polygons.push(
             new google.maps.Polygon({
                 paths: data.polygon,
