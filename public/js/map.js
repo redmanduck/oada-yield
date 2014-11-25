@@ -9,6 +9,12 @@ var OADAMap = {
         }
 }
 
+var combine_marker = null; //this refers to the position of the combine
+
+var MINIMUM_EFFECTIVE_YIELD = 0.01;
+var MAXIMUM_EFFECTIVE_YIELD = 1.0;
+
+var cmapper = new colorMapper(MINIMUM_EFFECTIVE_YIELD, MAXIMUM_EFFECTIVE_YIELD, 1.0,1.0);
 var OADAStreams = {
   location: [],
     getNext: function(){
@@ -115,7 +121,7 @@ function updateMap(){
 
   if(k !== undefined){
     var dist = Utils.haversine(v.point.lat, v.point.lng, k.point.lat, k.point.lng);
-
+    //if the distance is greater than 1 km (out of field), move there otherwise we stay where we are
     if(dist > 1){
       OADAMap.map.panTo(v.point); //note that v is a array of N elements, each element is the vertex of the polygon.
     }
@@ -128,22 +134,35 @@ function updateMap(){
  *    latlon points to construct polygon from
  */
 function draw(data){
-    var fillcol = '#00ff00';
-    if(data.yield < 30){
-      fillcol = '#F7113B';
+    var rgb = cmapper.map(data.yield);
+    var fillcol = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
+    if(combine_marker != null) combine_marker.setMap(null);
+
+    if(data.yield < MINIMUM_EFFECTIVE_YIELD){
+      combine_marker = new google.maps.Marker({
+          position: data.point,
+          map: OADAMap.map,
+          title: 'Combine Position'
+      });
+
+      return; 
     }
     OADAMap.polygons.push(
             new google.maps.Polygon({
                 paths: data.polygon,
-                strokeColor: '#00ff00',
-                strokeOpacity: 0.8,
-                strokeWeight: 0,
+                strokeColor: fillcol,
+                strokeOpacity: 0.9,
+                strokeWeight: 1,
                 fillColor: fillcol,
-                fillOpacity: 0.6
+                fillOpacity: 0.7
             })
     );
     var obj = OADAMap.polygons[OADAMap.polygons.length - 1];
     obj.setMap(OADAMap.map);
+    var clck_callback = function(){
+      console.log(data);
+    }
+    google.maps.event.addListener(obj, 'click', clck_callback);
     
 }
 

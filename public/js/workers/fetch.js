@@ -103,6 +103,7 @@ function make_request(uri, done_request){
 * given a response text 
 * returns nothing
 */
+var YIELD_DELAY_OFFSET = 12;
 function done_wmf(rtext){
 	var jsonres = null;
 	try{
@@ -113,7 +114,7 @@ function done_wmf(rtext){
 	var streamdata = jsonres.stream;
 	for(var i = 0; i < streamdata.length ; i++){
 		streamdata[i].flow = parseFloat(streamdata[i].flow)
-		streamdata[i].t = parseInt(streamdata[i].t);
+		streamdata[i].t = parseInt(streamdata[i].t) - YIELD_DELAY_OFFSET;
 		wmftree.insert(streamdata[i]); //insert into kD-tree
 	}
 	console.log("WMF Data length: " + streamdata.length);
@@ -175,7 +176,7 @@ var connector = {
     var mypt = stream_pts[polyoffset];
     var b = polygonify(mypt, dLAT, dLON);
     var yieldpt = wmftree.nearest(mypt, 1)[0][0];
-    console.log("Yield flow: " + yieldpt.flow)
+
     // if(stream_pts[polyoffset - 1] !== undefined){
     // 	//if there is a previous point
     // 	//connect the it with the next point
@@ -186,11 +187,18 @@ var connector = {
     // }
     //connect previous point
 
+    /*
+    * polygon: N-vertices Polygon is an array of N latlng
+    * point: center lat lng point as recieved
+    * yield: bushel per second (wet)
+    */
     var wrapper = {
     	"polygon": b,
     	"point": mypt,
-    	"yield": parseFloat(yieldpt.flow)
+    	"yield": parseFloat(yieldpt.flow)* 0.0159
     }
+
+    console.log("bu/sec (wet): " + wrapper.yield);
 
     polyoffset++;
     postMessage({
