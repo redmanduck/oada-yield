@@ -31,6 +31,15 @@ var url_params = {
 	"view": { "stream": { "$each": { "t": { "$gt": _STARTDATE, "$lt":  _ENDDATE } } } }
 }
 
+function rebuild_view_param(start,end){
+	_STARTDATE = start;
+  	_ENDDATE = end;
+
+	url_params = {
+		"view": { "stream": { "$each": { "t": { "$gt": _STARTDATE, "$lt":  _ENDDATE } } } }
+	}
+}
+
 
 function time_diff(a,b){
 	return Math.abs(b.t - a.t);
@@ -83,12 +92,18 @@ var COMPLETED_WMF = false;
 *  @param {string} uri - path of the OADA API
 *  @param {function} done_request - callback function 
 */
-function make_request(uri, done_request){
+function make_request(uri, done_request, without_param){
 
   COMPLETED_WMF = false; //barrier that blocks location request from proceeded if its done before WMF
 
   var xhr = new XMLHttpRequest();
   var url = config.base_url + uri + "?view=" + encodeURIComponent(JSON.stringify(url_params.view));
+
+  //use no view parameter
+  if(without_param === true){
+  	  url = config.base_url + uri;
+  }
+
   xhr.open("GET", url, true);
   console.log("making request to " + url);
   xhr.setRequestHeader("Authorization","Bearer 123456789");
@@ -122,7 +137,7 @@ function make_request(uri, done_request){
 * given a response text 
 * returns nothing
 */
-var YIELD_DELAY_OFFSET = 12;
+var YIELD_DELAY_OFFSET = 12; //seconds
 function done_wmf(rtext){
 	var jsonres = null;
 	try{
@@ -177,6 +192,9 @@ function done_location(rtext){
 	    	object: "Disconnect (Stop)"
 	});
 
+	//make to more parallel request
+  	make_request(API.wmf, done_wmf, true); 
+  	make_request(API.location, done_location, true);
 }
 
 
@@ -224,10 +242,12 @@ var connector = {
 //wait for init from main thread
 self.addEventListener('message', function(ev) {
   config.base_url = ev.data.base_url;
+  rebuild_view_param(ev.data.start, ev.data.end);
+
   setInterval(connector.sendstream, 25);
 
   //make to parallel request
-  make_request(API.wmf, done_wmf); 
-  make_request(API.location, done_location);
+  make_request(API.wmf, done_wmf, ev.data.realtime); 
+  make_request(API.location, done_location, ev.data.realtime);
 
 }, false);

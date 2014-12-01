@@ -51,8 +51,21 @@ pfetch.onmessage = function(ev){
  * Start the background fetch worker.
  */
 function startWorker(){
+  var endpoint_url =  $("#modal_setup input[name=endpoint]").val();
+  var starttime_text = $("#modal_setup input[name=start]").val();
+  var endtime_text = $("#modal_setup input[name=end]").val();
+  var starttime = moment(starttime_text).unix()
+  var endtime = moment(endtime_text).unix()
+
   OADAMap.update_status("Attempting to connect..");
-  pfetch.postMessage({base_url: "https://provider.oada-dev.com/tierra/oada"});
+  var threquest = {
+        start: starttime,
+        end: endtime,
+        realtime: (endtime_text == ""),
+        base_url: endpoint_url
+      }
+  console.log(threquest)
+  pfetch.postMessage(threquest);
 }
 
 /**
