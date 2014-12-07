@@ -3,6 +3,8 @@ var OADAMap = {
         polygons: [],
         polygon_count: 0,
         status_controlId: null,
+        follow_controlId: null,
+        autopan: true,
         update_status: function(str){
           var m = document.getElementById(this.status_controlId);
           m.innerHTML = str;
@@ -47,6 +49,13 @@ pfetch.onmessage = function(ev){
    }
 }
 
+
+function toggle_follow(){
+  OADAMap.autopan = !OADAMap.autopan;
+  var m = document.getElementById(OADAMap.follow_controlId);
+  if(OADAMap.autopan) m.innerHTML = "<strong>Stop</strong> following tractor";
+  if(!OADAMap.autopan) m.innerHTML = "<strong>Start</strong> following tractor";
+}
 /**
  * Start the background fetch worker.
  */
@@ -90,12 +99,20 @@ function initialize() {
 
   //create the 'status' button 
   var disconnect_btn_div = document.createElement('div');
+  var follow_btn_div = document.createElement('div');
   var control = new Control("Not connected!", null, disconnect_btn_div, OADAMap.map);
-  disconnect_btn_div.index = 1;
   OADAMap.status_controlId = "control_" + UIManager.control_count;
+
+  var follow_control = new Control("<strong>Stop</strong> following tractor", toggle_follow, follow_btn_div, OADAMap.map);
+  OADAMap.follow_controlId = "control_" + UIManager.control_count;
+
+  disconnect_btn_div.index = 1;
+  follow_control.index = 2;
+
 
   OADAMap.map = new google.maps.Map(document.getElementById('map-canvas'), options);
   OADAMap.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(disconnect_btn_div);
+  OADAMap.map.controls[google.maps.ControlPosition.TOP_LEFT].push(follow_btn_div);
 
   //some tool for debugging, right click to see detail about polygon
   google.maps.event.addListener(OADAMap.map, "rightclick", function(event){
@@ -105,7 +122,7 @@ function initialize() {
   });
 
   //periodically update map with new incoming point
-  myInterval = setInterval(function() { updateMap(); }, 25); 
+  myInterval = setInterval(function() { updateMap(); }, 1000); 
 
   //display setup modal dialog
   setTimeout(function(){
@@ -137,13 +154,14 @@ function updateMap(){
   var v = OADAStreams.getNext();
   draw(v);
 
-  if(k !== undefined){
-    var dist = Utils.haversine(v.point.lat, v.point.lng, k.point.lat, k.point.lng);
-    //if the distance is greater than 1 km (out of field), move there otherwise we stay where we are
-    if(dist > 1){
-      OADAMap.map.panTo(v.point); 
-    }
-  }
+  // if(k !== undefined){
+  //   var dist = Utils.haversine(v.point.lat, v.point.lng, k.point.lat, k.point.lng);
+  //   //if the distance is greater than 1 km (out of field), move there otherwise we stay where we are
+  //   if(dist > 1){
+  //     OADAMap.map.panTo(v.point); 
+  //   }
+  // }
+   if(OADAMap.autopan) OADAMap.map.panTo(v.point); 
 }
 
 /**

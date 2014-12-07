@@ -206,7 +206,7 @@ var connector = {
     var mypt = stream_pts[polyoffset];
     var b = polygonify(mypt, dLAT, dLON);
     var yieldpt = wmftree.nearest(mypt, 1)[0][0];
-
+    wmftree.remove(yieldpt); //once we use it, we odnt need it no more
 
     /* if(stream_pts[polyoffset - 1] !== undefined){
      	//if there is a previous point connect the it with the next point
@@ -244,7 +244,7 @@ self.addEventListener('message', function(ev) {
   config.base_url = ev.data.base_url;
   rebuild_view_param(ev.data.start, ev.data.end);
 
-  setInterval(connector.sendstream, 25);
+  setInterval(connector.sendstream, 1000);
 
   //make to parallel request
   make_request(API.wmf, done_wmf, ev.data.realtime); 
