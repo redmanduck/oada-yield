@@ -89,7 +89,7 @@ function join_polygons(blobA, blobB){
 var COMPLETED_WMF = false; 
 
 
-var last_t = 1418050060;
+var last_t = Date.now()/1000;
 /*
 *  Make OADA CORS request with view parameter and auth header
 *  @param {string} uri - path of the OADA API
@@ -215,7 +215,7 @@ var connector = {
   		var prevpt = stream_pts[polyoffset - 1];
   		if(prevpt !== undefined){
   			var delay = mypt.t - prevpt.t;
-  			console.log("Adding " + delay + " sec delay"); 
+  			// console.log("Adding " + delay + " sec delay"); 
   			//Looks like eveyr points are 1 sec apart! The wats teh point!
   		}
   	} 
