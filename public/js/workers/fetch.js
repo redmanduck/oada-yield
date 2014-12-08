@@ -2,7 +2,8 @@
 importScripts("/vendors/ubilabs/kdTree-min.js");
 
 var config = {
-	base_url: ""
+	base_url: "",
+	playbackmode: "1x"
 }
 var API = {
 	location: "/resources/LOC4727",
@@ -204,9 +205,25 @@ var connector = {
   	if(polyoffset > stream_pts.length - 1) return;
 
     var mypt = stream_pts[polyoffset];
+
+  	if(config.playbackmode == "1x"){
+  		//add real delays
+  		var prevpt = stream_pts[polyoffset - 1];
+  		if(prevpt !== undefined){
+  			var delay = mypt.t - prevpt.t;
+  			console.log("Adding " + delay + " sec delay"); 
+  			//Looks like eveyr points are 1 sec apart! The wats teh point!
+  		}
+  	} 
+
     var b = polygonify(mypt, dLAT, dLON);
-    var yieldpt = wmftree.nearest(mypt, 1)[0][0];
-    wmftree.remove(yieldpt); //once we use it, we odnt need it no more
+
+    var yieldpt = { "flow": 0 };
+    if(wmftree.nearest(mypt, 1) !== undefined && wmftree.nearest(mypt, 1) != null){
+    	yieldpt = wmftree.nearest(mypt, 1)[0][0];
+    }
+
+    wmftree.remove(yieldpt); //once we use it, we throw it away
 
     /* if(stream_pts[polyoffset - 1] !== undefined){
      	//if there is a previous point connect the it with the next point
@@ -225,7 +242,7 @@ var connector = {
     var wrapper = {
     	"polygon": b,
     	"point": mypt,
-    	"yield": parseFloat(yieldpt.flow)* 0.0159
+    	"yield": parseFloat(yieldpt.flow) * 0.0159
     }
 
     console.log("bu/sec (wet): " + wrapper.yield);
@@ -239,12 +256,15 @@ var connector = {
   }
 }
 
+
 //wait for init from main thread
 self.addEventListener('message', function(ev) {
   config.base_url = ev.data.base_url;
   rebuild_view_param(ev.data.start, ev.data.end);
 
-  setInterval(connector.sendstream, 1000);
+  var BASE_INTERVAL = 25;
+
+  setInterval(connector.sendstream, BASE_INTERVAL);
 
   //make to parallel request
   make_request(API.wmf, done_wmf, ev.data.realtime); 

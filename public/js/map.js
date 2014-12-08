@@ -122,7 +122,7 @@ function initialize() {
   });
 
   //periodically update map with new incoming point
-  myInterval = setInterval(function() { updateMap(); }, 1000); 
+  myInterval = setInterval(function() { updateMap(); }, 25); 
 
   //display setup modal dialog
   setTimeout(function(){
