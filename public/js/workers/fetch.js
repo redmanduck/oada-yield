@@ -88,6 +88,8 @@ function join_polygons(blobA, blobB){
 
 var COMPLETED_WMF = false; 
 
+
+var last_t;
 /*
 *  Make OADA CORS request with view parameter and auth header
 *  @param {string} uri - path of the OADA API
@@ -102,7 +104,8 @@ function make_request(uri, done_request, without_param){
 
   //use no view parameter
   if(without_param === true){
-  	  url = config.base_url + uri;
+  	  rebuild_view_param(last_t, last_t+3000); //3000 seconds window size
+  	  url = config.base_url + uri + "?view=" + encodeURIComponent(JSON.stringify(url_params.view));;
   }
 
   xhr.open("GET", url, true);
@@ -196,6 +199,7 @@ function done_location(rtext){
 	//make to more parallel request
   	make_request(API.wmf, done_wmf, true); 
   	make_request(API.location, done_location, true);
+  	last_t = _ENDDATE;
 }
 
 
