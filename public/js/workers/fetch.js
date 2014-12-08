@@ -89,7 +89,7 @@ function join_polygons(blobA, blobB){
 var COMPLETED_WMF = false; 
 
 
-var last_t;
+var last_t = 1418050060;
 /*
 *  Make OADA CORS request with view parameter and auth header
 *  @param {string} uri - path of the OADA API
